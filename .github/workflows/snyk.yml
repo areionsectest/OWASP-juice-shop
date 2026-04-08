@@ -1,0 +1,42 @@
+name: Snyk SCA Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  snyk-sca:
+    runs-on: ubuntu-latest
+
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true  # ensures SARIF upload runs even if vulns found
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=package-lock.json --severity-threshold=high --sarif-file-output=snyk.sarif --org=94950c75-721b-4627-9aee-cb9de30f4de0
+
+      # Upload results to GitHub Security tab
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
+
+      # Send results to Snyk dashboard for ongoing monitoring
+      - name: Monitor in Snyk dashboard
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: --file=package-lock.json --org=94950c75-721b-4627-9aee-cb9de30f4de0
