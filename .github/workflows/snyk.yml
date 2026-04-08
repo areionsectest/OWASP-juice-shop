@@ -10,11 +10,6 @@ jobs:
   snyk-sca:
     runs-on: ubuntu-latest
 
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
-
     steps:
       - uses: actions/checkout@master
 
@@ -25,13 +20,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --file=package-lock.json --severity-threshold=high --sarif-file-output=snyk.sarif --org=94950c75-721b-4627-9aee-cb9de30f4de0
-
-      # Upload root scan results to GitHub Security tab
-      - name: Upload root scan to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: snyk.sarif
+          args: --file=package-lock.json --severity-threshold=high --org=94950c75-721b-4627-9aee-cb9de30f4de0
 
       # Monitor root package in Snyk dashboard
       - name: Monitor root package in Snyk dashboard
@@ -42,20 +31,14 @@ jobs:
           command: monitor
           args: --file=package-lock.json --org=94950c75-721b-4627-9aee-cb9de30f4de0
 
-      # Scan sca-test/package-lock.json (GitHub Action only — not scanned locally)
+      # Scan sca-test/package-lock.json (GitHub Action only)
       - name: Run Snyk on sca-test/package-lock.json
         uses: snyk/actions/node@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --file=sca-test/package-lock.json --severity-threshold=high --sarif-file-output=snyk-sca-test.sarif --org=94950c75-721b-4627-9aee-cb9de30f4de0
-
-      # Upload sca-test scan results to GitHub Security tab
-      - name: Upload sca-test scan to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: snyk-sca-test.sarif
+          args: --file=sca-test/package-lock.json --severity-threshold=high --org=94950c75-721b-4627-9aee-cb9de30f4de0
 
       # Monitor sca-test package in Snyk dashboard
       - name: Monitor sca-test package in Snyk dashboard
