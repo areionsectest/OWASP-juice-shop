@@ -64,3 +64,24 @@ jobs:
         with:
           command: monitor
           args: --file=sca-test/package-lock.json --org=3f8b7d94-37db-4355-b4a3-5fb20f6d9af8
+
+  snyk-sast:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@master
+
+      - name: Run Snyk Code SAST - wiz-default org
+        run: snyk code test --severity-threshold=high --org=94950c75-721b-4627-9aee-cb9de30f4de0 --report
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Run Snyk Code SAST - annam-org-test org
+        run: snyk code test --severity-threshold=high --org=3f8b7d94-37db-4355-b4a3-5fb20f6d9af8 --report
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
