@@ -198,11 +198,6 @@ restoreOverwrittenFilesWithOriginals().then(() => {
     next()
   })
 
-  /* Remove duplicate slashes from URL which allowed bypassing subsequent filters */
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    req.url = req.url.replace(/[/]+/g, '/')
-    next()
-  })
 
   /* Increase request counter metric for every request */
   app.use(metrics.observeRequestMetricsMiddleware())
