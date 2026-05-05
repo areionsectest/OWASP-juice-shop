@@ -10,6 +10,10 @@ jobs:
   xray-scan:
     runs-on: ubuntu-latest
 
+    env:
+      JFROG_BUILD_NAME: owasp-juice-shop
+      JFROG_BUILD_NUMBER: ${{ github.run_number }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -29,3 +33,6 @@ jobs:
 
       - name: Run JFrog Xray audit
         run: jf audit --npm --fail=false
+
+      - name: Collect and publish build info to Artifactory
+        run: jf rt build-publish
