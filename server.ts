@@ -198,7 +198,6 @@ restoreOverwrittenFilesWithOriginals().then(() => {
     next()
   })
 
-
   /* Increase request counter metric for every request */
   app.use(metrics.observeRequestMetricsMiddleware())
 
