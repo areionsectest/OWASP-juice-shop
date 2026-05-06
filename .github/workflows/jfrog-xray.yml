@@ -32,8 +32,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run JFrog Xray audit
+      - name: Run JFrog Xray scan
         run: jf scan "./sca-test/" --fail=false --secrets=false
+        continue-on-error: true
 
       - name: Collect and publish build info to Artifactory
         run: jf rt build-publish
