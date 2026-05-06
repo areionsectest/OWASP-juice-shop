@@ -33,7 +33,7 @@ jobs:
         run: npm ci
 
       - name: Run JFrog Xray audit
-        run: jf audit --working-dirs="./sca-test" --watches=annam-test --fail=false
+        run: jf audit --npm --working-dirs="./sca-test" --watches=annam-test --fail=false
 
       - name: Collect and publish build info to Artifactory
         run: jf rt build-publish
