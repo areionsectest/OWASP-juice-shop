@@ -70,12 +70,6 @@ def greet():
     return "<h1>Hello, " + name + "</h1>"
 
 
-# Open Redirect — user-controlled redirect target
-@app.route("/redirect")
-def redirect_user():
-    target = request.args.get("next", "/")
-    return app.make_response(("", 302, {"Location": target}))
-
 
 if __name__ == "__main__":
     app.run(debug=True)
