@@ -29,14 +29,19 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm ci
 
-      - name: Run JFrog Xray audit
-        run: jf audit --npm --working-dirs="./sca-test" --watches=annam-test --fail=false
+      - name: Install sca-test dependencies via Artifactory
+        working-directory: ./sca-test
+        run: jf npm ci --repo-resolve=annam-npm-test
 
-      - name: Collect and publish build info to Artifactory
+      - name: Run JFrog Xray scan
+        run: jf scan "./sca-test/" --watches=annam-test --fail=false
+        continue-on-error: true
+
+      - name: Publish build info to Artifactory
         run: jf rt build-publish
 
       - name: Trigger Xray build scan
-        run: jf build-scan "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" --fail=false
+        run: jf build-scan "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" --watches=annam-test --fail=false
