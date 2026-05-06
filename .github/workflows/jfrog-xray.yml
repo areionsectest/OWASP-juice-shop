@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      JFROG_BUILD_NAME: owasp-juice-shop
-      JFROG_BUILD_NUMBER: ${{ github.run_number }}
+      JFROG_CLI_BUILD_NAME: owasp-juice-shop
+      JFROG_CLI_BUILD_NUMBER: ${{ github.run_number }}
 
     steps:
       - uses: actions/checkout@v4
@@ -46,4 +46,4 @@ jobs:
         run: jf rt build-publish
 
       - name: Trigger Xray build scan
-        run: jf build-scan "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" --watches=annam-test --fail=false
+        run: jf build-scan owasp-juice-shop "$JFROG_CLI_BUILD_NUMBER" --watches=annam-test --fail=false
