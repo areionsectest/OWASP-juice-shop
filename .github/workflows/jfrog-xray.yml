@@ -37,3 +37,6 @@ jobs:
 
       - name: Collect and publish build info to Artifactory
         run: jf rt build-publish
+
+      - name: Trigger Xray build scan
+        run: jf build-scan "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" --fail=false
