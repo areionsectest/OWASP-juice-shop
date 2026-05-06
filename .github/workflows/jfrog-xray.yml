@@ -33,7 +33,7 @@ jobs:
         run: npm ci
 
       - name: Run JFrog Xray audit
-        run: jf audit --npm --fail=false
+        run: jf scan
 
       - name: Collect and publish build info to Artifactory
         run: jf rt build-publish
