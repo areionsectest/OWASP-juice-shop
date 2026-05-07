@@ -11,18 +11,22 @@ jobs:
   xray-scan:
     runs-on: ubuntu-latest
 
-    env:
-      JFROG_CLI_BUILD_NAME: owasp-juice-shop
-      JFROG_CLI_BUILD_NUMBER: ${{ github.run_number }}
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
+        with:
+          version: latest
         env:
           JF_URL: ${{ vars.JF_URL }}
           JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+
+      - name: Enable Command Summaries
+        run: |
+          echo "JFROG_CLI_COMMAND_SUMMARY_OUTPUT_DIR=${{ runner.temp }}/jfrog-summary" >> $GITHUB_ENV
+          echo "JFROG_URL=${{ vars.JF_URL }}" >> $GITHUB_ENV
+          mkdir -p "${{ runner.temp }}/jfrog-summary"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -43,7 +47,21 @@ jobs:
         continue-on-error: true
 
       - name: Publish build info to Artifactory
-        run: jf rt build-publish
+        run: jf rt build-publish ${{ github.repository }} ${{ github.run_number }}
 
       - name: Trigger Xray build scan
-        run: jf build-scan owasp-juice-shop "$JFROG_CLI_BUILD_NUMBER" --watches=annam-test --fail=false
+        run: jf build-scan ${{ github.repository }} ${{ github.run_number }} --watches=annam-test --fail=false
+
+      - name: Generate Summary
+        run: jf gsm
+
+      - name: Display Summary
+        run: |
+          echo "## JFrog CLI Summary" >> $GITHUB_STEP_SUMMARY
+          cat "$JFROG_CLI_COMMAND_SUMMARY_OUTPUT_DIR/jfrog-command-summary/markdown.md" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Summary as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jfrog-summary
+          path: ${{ runner.temp }}/jfrog-summary/
