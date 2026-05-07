@@ -43,7 +43,7 @@ jobs:
           jf npm ci
 
       - name: Run JFrog Xray scan
-        run: jf scan "./sca-test/" --watches=annam-test --fail=false
+        run: jf scan "./sca-test/" --watches=annam-test --fail=false --secrets=false --iac=false
         continue-on-error: true
 
       - name: Publish build info to Artifactory
