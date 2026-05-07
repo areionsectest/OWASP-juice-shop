@@ -47,7 +47,7 @@ jobs:
         continue-on-error: true
 
       - name: Publish build info to Artifactory
-        run: jf rt build-publish ${{ github.repository }} ${{ github.run_number }}
+        run: jf rt build-publish "areionsectest/OWASP-juice-shop" ${{ github.run_number }}
 
       - name: Trigger Xray build scan
         run: jf build-scan ${{ github.repository }} ${{ github.run_number }} --watches=annam-test --fail=false
