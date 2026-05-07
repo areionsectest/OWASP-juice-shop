@@ -3,14 +3,18 @@ SAST test file — intentionally contains code-level vulnerabilities detectable 
 For security testing purposes only.
 """
 
+import ipaddress
 import os
 import subprocess
 import sqlite3
 import pickle
 import hashlib
 import random
+import socket
+from urllib.parse import urlparse
+
 import requests
-from flask import Flask, request
+from flask import Flask, request, abort
 
 
 app = Flask(__name__)
@@ -55,11 +59,34 @@ def generate_token():
     return str(random.randint(100000, 999999))
 
 
-# SSRF — user-controlled URL fetched server-side without validation
+ALLOWED_FETCH_SCHEMES = {"http", "https"}
+
 @app.route("/fetch")
 def fetch():
     url = request.args.get("url")
-    response = requests.get(url)
+    if not url:
+        abort(400, "Missing url parameter")
+
+    parsed = urlparse(url)
+
+    if parsed.scheme not in ALLOWED_FETCH_SCHEMES:
+        abort(400, "Scheme not allowed")
+
+    hostname = parsed.hostname
+    if not hostname:
+        abort(400, "Invalid URL")
+
+    try:
+        resolved = socket.getaddrinfo(hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM)
+    except socket.gaierror:
+        abort(400, "Cannot resolve hostname")
+
+    for family, _type, _proto, _canonname, sockaddr in resolved:
+        ip = ipaddress.ip_address(sockaddr[0])
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
+            abort(403, "Requests to private/internal addresses are not allowed")
+
+    response = requests.get(url, allow_redirects=False, timeout=5)
     return response.text
 
 
