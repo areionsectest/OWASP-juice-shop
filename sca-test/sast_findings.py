@@ -11,6 +11,7 @@ import hashlib
 import random
 import requests
 from flask import Flask, request
+from markupsafe import escape
 
 
 app = Flask(__name__)
@@ -67,7 +68,7 @@ def fetch():
 @app.route("/greet")
 def greet():
     name = request.args.get("name", "guest")
-    return "<h1>Hello, " + name + "</h1>"
+    return "<h1>Hello, " + escape(name) + "</h1>"
 
 
 
